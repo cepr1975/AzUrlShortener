@@ -64,7 +64,7 @@ namespace Cloud5mins.ShortenerTools
                     .Select(b => ConversionCode[b % ConversionCode.Length]);
                 var token = new string(chars.ToArray());
                 var reversedToken = string.Join(string.Empty, token.Reverse());
-                return uniqueId + reversedToken;
+                return uniqueId + reversedToken + "_cer";
             }
         }
     }
