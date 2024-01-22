@@ -48,6 +48,14 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             return eShortUrl;
         }
 
+        public async Task<MyShortUrlEntity> GetShortUrlEntity(MyShortUrlEntity row)
+        {
+            TableOperation selOperation = TableOperation.Retrieve<MyShortUrlEntity>(row.PartitionKey, row.RowKey);
+            TableResult result = await GetUrlsTable().ExecuteAsync(selOperation);
+            MyShortUrlEntity eShortUrl = result.Result as MyShortUrlEntity;
+            return eShortUrl;
+        }
+
         public async Task<List<ShortUrlEntity>> GetAllShortUrlEntities()
         {
             var tblUrls = GetUrlsTable();
@@ -102,6 +110,18 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             TableOperation insOperation = TableOperation.InsertOrMerge(newShortUrl);
             TableResult result = await GetUrlsTable().ExecuteAsync(insOperation);
             ShortUrlEntity eShortUrl = result.Result as ShortUrlEntity;
+            return eShortUrl;
+        }
+
+        public async Task<MyShortUrlEntity> SaveShortUrlEntity(MyShortUrlEntity newShortUrl)
+        {
+
+            // serializing the collection easier on json shares
+            //newShortUrl.SchedulesPropertyRaw = JsonSerializer.Serialize<List<Schedule>>(newShortUrl.Schedules);
+
+            TableOperation insOperation = TableOperation.InsertOrMerge(newShortUrl);
+            TableResult result = await GetUrlsTable().ExecuteAsync(insOperation);
+            MyShortUrlEntity eShortUrl = result.Result as MyShortUrlEntity;
             return eShortUrl;
         }
 
@@ -183,6 +203,14 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
         public async Task<ShortUrlEntity> ArchiveShortUrlEntity(ShortUrlEntity urlEntity)
         {
             ShortUrlEntity originalUrl = await GetShortUrlEntity(urlEntity);
+            originalUrl.IsArchived = true;
+
+            return await SaveShortUrlEntity(originalUrl);
+        }
+
+        public async Task<MyShortUrlEntity> ArchiveShortUrlEntity(MyShortUrlEntity urlEntity)
+        {
+            MyShortUrlEntity originalUrl = await GetShortUrlEntity(urlEntity);
             originalUrl.IsArchived = true;
 
             return await SaveShortUrlEntity(originalUrl);
