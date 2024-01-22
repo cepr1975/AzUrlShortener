@@ -80,6 +80,11 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             Initialize(longUrl, endUrl, title, null, schedules);
         }
 
+        public MyShortUrlEntity(string longUrl, string endUrl, string title, Nullable<DateTime> expiresat, Schedule[] schedules)
+        {
+            Initialize(longUrl, endUrl, title, expiresat, schedules);
+        }
+
         private void Initialize(string longUrl, string endUrl, string title, Nullable<DateTime> expiresat, Schedule[] schedules)
         {
             PartitionKey = endUrl.First().ToString();

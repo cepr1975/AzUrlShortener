@@ -136,6 +136,13 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             ShortUrlEntity eShortUrl = await GetShortUrlEntity(row);
             return (eShortUrl != null);
         }
+
+        public async Task<bool> IfShortUrlEntityExist(MyShortUrlEntity row)
+        {
+            MyShortUrlEntity eShortUrl = await GetShortUrlEntity(row);
+            return (eShortUrl != null);
+        }
+
         public async Task<int> GetNextTableId()
         {
             //Get current ID
