@@ -28,21 +28,21 @@ using System.Threading.Tasks;
 
 namespace Cloud5mins.ShortenerTools.Functions
 {
-    public class UrlList2
+    public class UrlList3
     {
 
         private readonly ILogger _logger;
         private readonly ShortenerSettings _settings;
 
-        public UrlList2(ILoggerFactory loggerFactory, ShortenerSettings settings)
+        public UrlList3(ILoggerFactory loggerFactory, ShortenerSettings settings)
         {
-            _logger = loggerFactory.CreateLogger<UrlList2>();
+            _logger = loggerFactory.CreateLogger<UrlList3>();
             _settings = settings;
         }
 
-        [Function("UrlList2")]
+        [Function("UrlList3")]
         public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/UrlList2")] HttpRequestData req, ExecutionContext context)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/UrlList3")] HttpRequestData req, ExecutionContext context)
         {
             _logger.LogInformation($"Starting UrlList...");
 
