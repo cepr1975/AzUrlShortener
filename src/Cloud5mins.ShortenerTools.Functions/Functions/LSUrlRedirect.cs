@@ -21,7 +21,7 @@ namespace Cloud5mins.ShortenerTools.Functions
 
         [Function("LSUrlRedirect")]
         public async Task<HttpResponseData> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/{shortUrl}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ls/api/{shortUrl}")]
             HttpRequestData req,
             string shortUrl,
             ExecutionContext context)
