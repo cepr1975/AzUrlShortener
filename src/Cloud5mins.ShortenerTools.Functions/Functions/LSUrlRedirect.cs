@@ -40,7 +40,7 @@ namespace Cloud5mins.ShortenerTools.Functions
 
                 if (newUrl != null)
                 {
-                    if (newUrl.ExpiresAt.HasValue && newUrl.ExpiresAt > System.DateTime.UtcNow)
+                    if (newUrl.ExpiresAt == null)
                     {
                         _logger.LogInformation($"Found it: {newUrl.Url}");
                         newUrl.Clicks++;
@@ -48,9 +48,17 @@ namespace Cloud5mins.ShortenerTools.Functions
                         await stgHelper.SaveShortUrlEntity(newUrl);
                         redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
                     }
-                    else
-                        _logger.LogInformation($"Found it: {newUrl.Url}, but ShortUrl has Expired:  {newUrl.ExpiresAt}");
-                    
+                    else 
+                        if(newUrl.ExpiresAt.HasValue && newUrl.ExpiresAt < System.DateTime.UtcNow)
+                            _logger.LogInformation($"Found it: {newUrl.Url}, but ShortUrl has Expired:  {newUrl.ExpiresAt}");
+                        else
+                        {
+                            _logger.LogInformation($"Found it: {newUrl.Url}");
+                            newUrl.Clicks++;
+                            await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
+                            await stgHelper.SaveShortUrlEntity(newUrl);
+                            redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
+                        }
                 }
             }
             else
