@@ -15,7 +15,7 @@ namespace Cloud5mins.ShortenerTools.Functions
 
         public LSUrlRedirect(ILoggerFactory loggerFactory, ShortenerSettings settings)
         {
-            _logger = loggerFactory.CreateLogger<UrlRedirect>();
+            _logger = loggerFactory.CreateLogger<LSUrlRedirect>();
             _settings = settings;
         }
 
