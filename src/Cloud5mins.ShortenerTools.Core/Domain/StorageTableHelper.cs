@@ -1,5 +1,8 @@
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Documents;
+using System.Net;
 using System.Text.Json;
+using System.Xml;
 
 namespace Cloud5mins.ShortenerTools.Core.Domain
 {
@@ -222,5 +225,38 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
             return await SaveShortUrlEntity(originalUrl);
         }
+
+        /// <summary>
+        /// Deletes all rows from the table
+        /// </summary>
+        /// <param name="tableClient">The authenticated TableClient</param>
+        /// <returns></returns>
+       
+        public async Task<string> DeleteAllEntitiesAsync()
+        {
+            int TotalItens = 0;
+            CloudTable Urlstable = GetUrlsTable();
+
+            TableQuery<MyShortUrlEntity> query = new TableQuery<MyShortUrlEntity>()
+            .Where(TableQuery.GenerateFilterCondition("ExpiresAt", QueryComparisons.LessThan, DateTime.UtcNow.ToString()));
+
+            var items = Urlstable.ExecuteQuery(query);
+            TotalItens = items.Count();
+            
+            int totalDeleted = 0;
+            foreach (var row in items)
+            {
+                var tableOperation = TableOperation.Delete(row);
+                TableResult tableResult = await Urlstable.ExecuteAsync(tableOperation);
+
+                if (tableResult.HttpStatusCode == (int)HttpStatusCode.OK)
+                    totalDeleted++;
+            }
+
+            return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
+
+        }
+
+        
     }
 }
