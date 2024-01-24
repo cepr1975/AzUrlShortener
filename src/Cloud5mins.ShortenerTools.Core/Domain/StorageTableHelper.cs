@@ -78,6 +78,25 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             return lstShortUrl;
         }
 
+        public async Task<List<MyShortUrlEntity>> LSGetAllShortUrlEntities()
+        {
+            var tblUrls = GetUrlsTable();
+            TableContinuationToken token = null;
+            var lstShortUrl = new List<MyShortUrlEntity>();
+            do
+            {
+                // Retreiving all entities that are NOT the NextId entity 
+                // (it's the only one in the partion "KEY")
+                TableQuery<MyShortUrlEntity> rangeQuery = new TableQuery<MyShortUrlEntity>().Where(
+                    filter: TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.NotEqual, "KEY"));
+
+                var queryResult = await tblUrls.ExecuteQuerySegmentedAsync(rangeQuery, token);
+                lstShortUrl.AddRange(queryResult.Results as List<MyShortUrlEntity>);
+                token = queryResult.ContinuationToken;
+            } while (token != null);
+            return lstShortUrl;
+        }
+
         /// <summary>
         /// Returns the ShortUrlEntity of the <paramref name="vanity"/>
         /// </summary>
@@ -232,7 +251,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
         /// <param name="tableClient">The authenticated TableClient</param>
         /// <returns></returns>
        
-        public async Task<string> DeleteAllEntitiesAsync()
+        public async Task<string> DeleteExpiredItemsAsync()
         {
             int TotalItens = 0;
             CloudTable Urlstable = GetUrlsTable();
@@ -249,8 +268,8 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
                 var tableOperation = TableOperation.Delete(row);
                 TableResult tableResult = await Urlstable.ExecuteAsync(tableOperation);
 
-                if (tableResult.HttpStatusCode == (int)HttpStatusCode.OK)
-                    totalDeleted++;
+                //if (tableResult.HttpStatusCode == (int)HttpStatusCode.OK)
+                totalDeleted++;
             }
 
             return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";

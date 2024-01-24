@@ -66,9 +66,9 @@ namespace Cloud5mins.ShortenerTools.Functions
             {
                 StorageTableHelper stgHelper = new StorageTableHelper(_settings.DataStorage);
 
-                string result = await stgHelper.DeleteAllEntitiesAsync();//LS
+                string result = await stgHelper.DeleteExpiredItemsAsync();//LS
 
-                _logger.LogInformation($"DeleteAllEntitiesAsync(): " + result);
+                _logger.LogInformation($"DeleteExpiredItemsAsync(): " + result);
 
             }
             catch (Exception ex)

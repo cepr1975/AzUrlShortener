@@ -28,23 +28,23 @@ using System.Threading.Tasks;
 
 namespace Cloud5mins.ShortenerTools.Functions
 {
-    public class UrlList3
+    public class LSUrlList
     {
 
         private readonly ILogger _logger;
         private readonly ShortenerSettings _settings;
 
-        public UrlList3(ILoggerFactory loggerFactory, ShortenerSettings settings)
+        public LSUrlList(ILoggerFactory loggerFactory, ShortenerSettings settings)
         {
-            _logger = loggerFactory.CreateLogger<UrlList3>();
+            _logger = loggerFactory.CreateLogger<LSUrlList>();
             _settings = settings;
         }
 
-        [Function("UrlList3")]
+        [Function("LSUrlList")]
         public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/UrlList3")] HttpRequestData req, ExecutionContext context)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/LSUrlList")] HttpRequestData req, ExecutionContext context)
         {
-            _logger.LogInformation($"Starting UrlList...");
+            _logger.LogInformation($"Starting LSUrlList...");
 
             var result = new ListResponse();
             string userId = string.Empty;
@@ -53,8 +53,8 @@ namespace Cloud5mins.ShortenerTools.Functions
 
             try
             {
-                result.UrlList = await stgHelper.GetAllShortUrlEntities();
-                result.UrlList = result.UrlList.Where(p => !(p.IsArchived ?? false)).ToList();
+                result.LSUrlList = await stgHelper.LSGetAllShortUrlEntities();
+                result.LSUrlList = result.LSUrlList.Where(p => !(p.IsArchived ?? false)).ToList();
                 var host = string.IsNullOrEmpty(_settings.CustomDomain) ? req.Url.Host : _settings.CustomDomain;
                 foreach (ShortUrlEntity url in result.UrlList)
                 {
