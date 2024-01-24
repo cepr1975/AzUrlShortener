@@ -102,7 +102,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             }
         }
 
-        public static MyShortUrlEntity GetEntity(string longUrl, string endUrl, string title, Schedule[] schedules)
+        public static MyShortUrlEntity GetEntity(string longUrl, string endUrl, string title, Nullable<DateTime> expiresat, Schedule[] schedules)
         {
             return new MyShortUrlEntity
             {
@@ -110,6 +110,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
                 RowKey = endUrl,
                 Url = longUrl,
                 Title = title,
+                ExpiresAt=expiresat,
                 Schedules = schedules.ToList<Schedule>()
             };
         }
