@@ -56,7 +56,7 @@ namespace Cloud5mins.ShortenerTools.Functions
                 result.LSUrlList = await stgHelper.LSGetAllShortUrlEntities();
                 result.LSUrlList = result.LSUrlList.Where(p => !(p.IsArchived ?? false)).ToList();
                 var host = string.IsNullOrEmpty(_settings.CustomDomain) ? req.Url.Host : _settings.CustomDomain;
-                foreach (ShortUrlEntity url in result.UrlList)
+                foreach (MyShortUrlEntity url in result.LSUrlList)
                 {
                     url.ShortUrl = Utility.GetShortUrl(host, url.RowKey);
                 }
