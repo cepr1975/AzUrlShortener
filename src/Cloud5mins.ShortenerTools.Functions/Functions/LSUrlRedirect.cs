@@ -2,6 +2,8 @@ using Cloud5mins.ShortenerTools.Core.Domain;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +46,8 @@ namespace Cloud5mins.ShortenerTools.Functions
                     {
                         _logger.LogInformation($"Found it: {newUrl.Url}");
                         newUrl.Clicks++;
-                        await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
+                        //await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
+                        await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, GetIpFromRequestHeaders(req)));
                         await stgHelper.SaveShortUrlEntity(newUrl);
                         redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
                     }
@@ -70,6 +73,25 @@ namespace Cloud5mins.ShortenerTools.Functions
             res.Headers.Add("Location", redirectUrl);
             return res;
 
+        }
+
+        private static string GetIpFromRequestHeaders(HttpRequestData req)
+        {
+            var ipAddressString = "";
+            var headerDictionary = req.Headers.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
+            var key = "x-forwarded-for";
+            if (headerDictionary.ContainsKey(key))
+            {
+                IPAddress? ipAddress = null;
+                var headerValues = headerDictionary[key];
+                var ipn = headerValues?.FirstOrDefault()?.Split(new char[] { ',' }).FirstOrDefault()?.Split(new char[] { ':' }).FirstOrDefault();
+                if (IPAddress.TryParse(ipn, out ipAddress))
+                {
+                    ipAddressString = ipAddress.ToString();
+                }
+            }
+
+            return ipAddressString;
         }
     }
 }
