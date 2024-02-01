@@ -276,6 +276,29 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         }
 
-        
+        public string CountClicksByClientIP(string partitionKey, string clientIP)
+        {
+            int TotalItens = 0;
+            CloudTable Urlstable = GetStatsTable();
+            DateTimeOffset GreaterThanOffset = DateTimeOffset.UtcNow.AddMinutes(-5);
+            DateTimeOffset LessThanOffset = DateTimeOffset.UtcNow;
+
+            string partitionKeyFilter  = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
+            string clientipFilter = TableQuery.GenerateFilterCondition("ClientIP", QueryComparisons.Equal, clientIP);
+            string DateTimeOffsetValGreaterFilter = TableQuery.GenerateFilterConditionForDate("Datetime", QueryComparisons.GreaterThan, GreaterThanOffset);
+            string DateTimeOffsetValLessFilter = TableQuery.GenerateFilterConditionForDate("Datetime", QueryComparisons.LessThan, LessThanOffset);
+            string finalFilter = TableQuery.CombineFilters(TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, clientipFilter), TableOperators.And,
+                TableQuery.CombineFilters(DateTimeOffsetValGreaterFilter, TableOperators.And, DateTimeOffsetValLessFilter));
+             
+
+            TableQuery<ClickStatsEntity> query = new TableQuery<ClickStatsEntity>().Where(finalFilter);
+
+            var items = Urlstable.ExecuteQuery(query);
+            TotalItens = items.Count();
+
+            return "#Clicks: " + TotalItens + " from clientIP : " + clientIP + "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString();
+        }
+
+
     }
 }

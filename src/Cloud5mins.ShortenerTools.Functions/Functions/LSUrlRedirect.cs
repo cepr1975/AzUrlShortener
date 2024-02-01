@@ -46,8 +46,13 @@ namespace Cloud5mins.ShortenerTools.Functions
                     {
                         _logger.LogInformation($"Found it: {newUrl.Url}");
                         newUrl.Clicks++;
+
                         //await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
-                        await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, GetIpFromRequestHeaders(req)));
+                        string clientIP = GetIpFromRequestHeaders(req);
+                        string resClicks = stgHelper.CountClicksByClientIP(newUrl.PartitionKey.ToString(), clientIP);
+                        _logger.LogInformation($"CountClicksByClientIP(): " + resClicks);
+
+                        await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, clientIP));
                         await stgHelper.SaveShortUrlEntity(newUrl);
                         redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
                     }
