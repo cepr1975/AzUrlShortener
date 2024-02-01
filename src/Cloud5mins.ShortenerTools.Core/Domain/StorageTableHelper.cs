@@ -285,8 +285,8 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
             string partitionKeyFilter  = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
             string clientipFilter = TableQuery.GenerateFilterCondition("ClientIP", QueryComparisons.Equal, clientIP);
-            string DateTimeOffsetValGreaterFilter = TableQuery.GenerateFilterConditionForDate("Datetime", QueryComparisons.GreaterThan, GreaterThanOffset);
-            string DateTimeOffsetValLessFilter = TableQuery.GenerateFilterConditionForDate("Datetime", QueryComparisons.LessThan, LessThanOffset);
+            string DateTimeOffsetValGreaterFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThan, GreaterThanOffset);
+            string DateTimeOffsetValLessFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThan, LessThanOffset);
             string finalFilter = TableQuery.CombineFilters(TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, clientipFilter), TableOperators.And,
                 TableQuery.CombineFilters(DateTimeOffsetValGreaterFilter, TableOperators.And, DateTimeOffsetValLessFilter));
              
