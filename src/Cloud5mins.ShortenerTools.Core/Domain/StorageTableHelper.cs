@@ -296,7 +296,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             var items = Urlstable.ExecuteQuery(query);
             TotalItens = items.Count();
 
-            return "#Clicks: " + TotalItens + " from clientIP : " + clientIP + "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString();
+            return "#Clicks: " + TotalItens + " of partitionKey: " + partitionKey + " from clientIP : " + clientIP + "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString();
         }
 
 
