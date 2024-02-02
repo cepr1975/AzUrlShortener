@@ -73,8 +73,8 @@ namespace Cloud5mins.ShortenerTools.Functions
                             newUrl.Clicks++;
                             if (resClicks[1] == "AllowRedirectOK")//Control #Clicks per Period of Time
                             {
-                                await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
-                                await stgHelper.SaveShortUrlEntity(newUrl);
+                            await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, clientIP));
+                            await stgHelper.SaveShortUrlEntity(newUrl);
                                 redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
                             }
                         }
