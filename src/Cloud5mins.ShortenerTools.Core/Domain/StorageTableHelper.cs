@@ -281,7 +281,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             int TotalItens = 0;
 
             CloudTable Urlstable = GetStatsTable();
-            DateTimeOffset GreaterThanOffset = DateTimeOffset.UtcNow.AddMinutes(-5);
+            DateTimeOffset GreaterThanOffset = DateTimeOffset.UtcNow.AddMinutes(ClickTimeintervalinMinutes);
             DateTimeOffset LessThanOffset = DateTimeOffset.UtcNow;
 
             string partitionKeyFilter  = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
