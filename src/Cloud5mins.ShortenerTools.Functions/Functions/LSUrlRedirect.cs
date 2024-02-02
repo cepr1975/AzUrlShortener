@@ -49,12 +49,15 @@ namespace Cloud5mins.ShortenerTools.Functions
 
                         //await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
                         string clientIP = GetIpFromRequestHeaders(req);
-                        string resClicks = stgHelper.CountClicksByClientIP(newUrl.RowKey.ToString(), clientIP, Convert.ToInt32(_settings.ClickTimeintervalinMinutes));
-                        _logger.LogInformation($"CountClicksByClientIP(): " + resClicks);
+                        string[] resClicks = stgHelper.CountClicksByClientIP(newUrl.RowKey.ToString(), clientIP, Convert.ToInt32(_settings.ClickTimeintervalinMinutes), Convert.ToInt32(_settings.MaxClicksPerPeriod)).ToArray();
+                        _logger.LogInformation($"CountClicksByClientIP(): " + resClicks[0]);
 
-                        await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, clientIP));
-                        await stgHelper.SaveShortUrlEntity(newUrl);
-                        redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
+                        if (resClicks[1] == "AllowRedirectOK")//Control #Clicks per Period of Time
+                        {
+                            await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, clientIP));
+                            await stgHelper.SaveShortUrlEntity(newUrl);
+                            redirectUrl = WebUtility.UrlDecode(newUrl.ActiveUrl);
+                        }
                     }
                     else 
                         if(newUrl.ExpiresAt.HasValue && newUrl.ExpiresAt < System.DateTime.UtcNow)

@@ -276,7 +276,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         }
 
-        public string CountClicksByClientIP(string partitionKey, string clientIP, int ClickTimeintervalinMinutes)
+        public string[] CountClicksByClientIP(string partitionKey, string clientIP, int ClickTimeintervalinMinutes, int MaxClicksPerPeriod)
         {
             int TotalItens = 0;
 
@@ -297,9 +297,20 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             var items = Urlstable.ExecuteQuery(query);
             TotalItens = items.Count();
 
-            return "#Clicks: " + TotalItens + " of partitionKey: " + partitionKey + " from clientIP : " + clientIP + 
+            string[] response = new string[2];
+            
+
+            if (TotalItens < MaxClicksPerPeriod)
+                response[1] = "AllowRedirectOK";
+            else
+                response[1] = "AllowRedirectNOK";
+
+            response[0] = "#Clicks: " + TotalItens + " of partitionKey: " + partitionKey + " from clientIP : " + clientIP +
                 "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString()
-                + " ClickTimeintervalinMinutes (setting): " + ClickTimeintervalinMinutes;
+                + " ClickTimeintervalinMinutes (setting): " + ClickTimeintervalinMinutes + " MaxClicksPerPeriod (setting): " + MaxClicksPerPeriod + " response: " + response[1];
+
+
+            return response.ToArray();
         }
 
 

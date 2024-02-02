@@ -8,5 +8,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         public string ClickTimeintervalinMinutes { get; set; }
 
+        public string MaxClicksPerPeriod { get; set; }
+
     }
 }
