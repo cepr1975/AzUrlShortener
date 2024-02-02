@@ -276,9 +276,10 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         }
 
-        public string CountClicksByClientIP(string partitionKey, string clientIP)
+        public string CountClicksByClientIP(string partitionKey, string clientIP, int ClickTimeintervalinMinutes)
         {
             int TotalItens = 0;
+
             CloudTable Urlstable = GetStatsTable();
             DateTimeOffset GreaterThanOffset = DateTimeOffset.UtcNow.AddMinutes(-5);
             DateTimeOffset LessThanOffset = DateTimeOffset.UtcNow;
@@ -296,7 +297,9 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             var items = Urlstable.ExecuteQuery(query);
             TotalItens = items.Count();
 
-            return "#Clicks: " + TotalItens + " of partitionKey: " + partitionKey + " from clientIP : " + clientIP + "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString();
+            return "#Clicks: " + TotalItens + " of partitionKey: " + partitionKey + " from clientIP : " + clientIP + 
+                "  between " + GreaterThanOffset.ToString() + " and " + LessThanOffset.ToString()
+                + " ClickTimeintervalinMinutes (setting): " + ClickTimeintervalinMinutes;
         }
 
 

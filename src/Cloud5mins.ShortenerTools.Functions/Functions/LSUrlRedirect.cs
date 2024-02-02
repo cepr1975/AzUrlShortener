@@ -49,7 +49,7 @@ namespace Cloud5mins.ShortenerTools.Functions
 
                         //await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey));
                         string clientIP = GetIpFromRequestHeaders(req);
-                        string resClicks = stgHelper.CountClicksByClientIP(newUrl.RowKey.ToString(), clientIP);
+                        string resClicks = stgHelper.CountClicksByClientIP(newUrl.RowKey.ToString(), clientIP, Convert.ToInt32(_settings.ClickTimeintervalinMinutes));
                         _logger.LogInformation($"CountClicksByClientIP(): " + resClicks);
 
                         await stgHelper.SaveClickStatsEntity(new ClickStatsEntity(newUrl.RowKey, clientIP));
