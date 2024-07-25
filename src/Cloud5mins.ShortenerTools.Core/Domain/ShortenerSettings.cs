@@ -10,5 +10,7 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         public string MaxClicksPerPeriod { get; set; }
 
+        public string DeleteEntitiesCreatedNNumberDaysBeforeToday { get; set; }
+
     }
 }

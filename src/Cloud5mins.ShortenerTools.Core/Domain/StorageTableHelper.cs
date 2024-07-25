@@ -313,6 +313,38 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             return response.ToArray();
         }
 
+        public async Task<string> CountExpiredItemsAsync(int DeleteEntitiesCreatedNNumberDaysBeforeToday)
+        {
+            int TotalItens = 0;
+            CloudTable Urlstable = GetUrlsTable();
 
+            DateTimeOffset dateTimeFilter = DateTime.UtcNow.AddDays(DeleteEntitiesCreatedNNumberDaysBeforeToday * -1);
+            //string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
+            //string startDateFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, startDate);
+            //string endDateFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, endDate);
+            //string combinedFilter = TableQuery.CombineFilters(
+            //    TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, startDateFilter),
+            //    TableOperators.And,
+            //    endDateFilter
+            //);
+            string Filter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThan, dateTimeFilter);
+            //string Filter = TableQuery.GenerateFilterConditionForDate("ExpiresAt", QueryComparisons.LessThan, dateTimeFilter); Não reconhece como DateTime
+
+            TableQuery<MyShortUrlEntity> query = new TableQuery<MyShortUrlEntity>().Where(Filter);
+
+            int TotalEntities = 0;
+            TableContinuationToken token = null;
+            do
+            {
+                TableQuerySegment<MyShortUrlEntity> segment = await Urlstable.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                TotalEntities += segment.Results.Count;
+            } while (token != null);
+
+            return "#Itens: " + TotalEntities + " for the DateFilter: " + dateTimeFilter.ToString() + "| DeleteEntitiesCreatedNNumberDaysBeforeToday: " + DeleteEntitiesCreatedNNumberDaysBeforeToday;
+
+            //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
+
+        }
     }
 }
