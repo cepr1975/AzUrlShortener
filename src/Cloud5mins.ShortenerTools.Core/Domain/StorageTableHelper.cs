@@ -346,5 +346,50 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
 
         }
+
+        public async Task<string> CountExpiredItemsAndDeleteAsync(int deleteEntitiesCreatedNNumberDaysBeforeToday)
+        {
+            int totalDeleted = 0;
+
+            CloudTable Urlstable = GetUrlsTable();
+
+            DateTimeOffset dateTimeFilter = DateTime.UtcNow.AddDays(deleteEntitiesCreatedNNumberDaysBeforeToday * -1);
+            //string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
+            //string startDateFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, startDate);
+            //string endDateFilter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, endDate);
+            //string combinedFilter = TableQuery.CombineFilters(
+            //    TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, startDateFilter),
+            //    TableOperators.And,
+            //    endDateFilter
+            //);
+            string Filter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThan, dateTimeFilter);
+            //string Filter = TableQuery.GenerateFilterConditionForDate("ExpiresAt", QueryComparisons.LessThan, dateTimeFilter); Não reconhece como DateTime
+
+            TableQuery<MyShortUrlEntity> query = new TableQuery<MyShortUrlEntity>().Where(Filter);
+
+            int TotalEntities = 0;
+            TableContinuationToken token = null;
+            do
+            {
+                TableQuerySegment<MyShortUrlEntity> segment = await Urlstable.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                TotalEntities += segment.Results.Count;
+
+                // Process and delete each entity
+                foreach (var entity in segment.Results)
+                {
+                    TableOperation deleteOperation = TableOperation.Delete(entity);
+                    await Urlstable.ExecuteAsync(deleteOperation);
+                    totalDeleted++;
+                }
+
+            } while (token != null);
+
+            return $"#Items: {TotalEntities} for the DateFilter: {dateTimeFilter} | DeleteEntitiesCreatedNNumberDaysBeforeToday: {deleteEntitiesCreatedNNumberDaysBeforeToday} \nDeleted: {totalDeleted} items.";
+            //return "#Itens: " + TotalEntities + " for the DateFilter: " + dateTimeFilter.ToString() + "| deleteEntitiesCreatedNNumberDaysBeforeToday: " + DeleteEntitiesCreatedNNumberDaysBeforeToday;
+
+            //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
+
+        }
     }
 }
