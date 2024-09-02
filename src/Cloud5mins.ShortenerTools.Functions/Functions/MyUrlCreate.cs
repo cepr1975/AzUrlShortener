@@ -103,11 +103,13 @@ namespace Cloud5mins.ShortenerTools.Functions
 
                 MyShortUrlEntity newRow;
 
+                _logger.LogInformation($"__trace vanity : {vanity}");
+
                 if (!string.IsNullOrEmpty(vanity))
                 {
                     newRow = new MyShortUrlEntity(longUrl, vanity, title, expiresat, input.Schedules);
 
-                    _logger.LogInformation($"__trace IfShortUrlEntityExist start: {DateTime.Now}");
+                    _logger.LogInformation($"__trace IfShortUrlEntityExist start: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
 
                     if (await stgHelper.IfShortUrlEntityExist(newRow))
                     {
@@ -116,23 +118,27 @@ namespace Cloud5mins.ShortenerTools.Functions
                         return badResponse;
                     }
 
-                    _logger.LogInformation($"__trace IfShortUrlEntityExist end: {DateTime.Now}");
+                    _logger.LogInformation($"__trace IfShortUrlEntityExist end: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
                 }
                 else
                 {
+                    _logger.LogInformation($"__trace MyShortUrlEntity start: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
+
                     newRow = new MyShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper), title, expiresat, input.Schedules);
+
+                    _logger.LogInformation($"__trace MyShortUrlEntity end: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
                 }
 
-                _logger.LogInformation($"__trace SaveShortUrlEntity start: {DateTime.Now}");
+                _logger.LogInformation($"__trace SaveShortUrlEntity start: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
 
                 await stgHelper.SaveShortUrlEntity(newRow);
 
-                _logger.LogInformation($"__trace SaveShortUrlEntity end: {DateTime.Now}");
+                _logger.LogInformation($"__trace SaveShortUrlEntity end: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
 
                 var host = string.IsNullOrEmpty(_settings.CustomDomain) ? req.Url.Host : _settings.CustomDomain.ToString();
                 result = new LSShortResponse(host, newRow.Url, newRow.RowKey, newRow.Title, expiresat);
 
-                _logger.LogInformation("Short Url created.");
+                _logger.LogInformation($"Short Url created: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
             }
             catch (Exception ex)
             {
