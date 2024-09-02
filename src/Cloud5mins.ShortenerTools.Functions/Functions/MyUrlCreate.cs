@@ -106,19 +106,28 @@ namespace Cloud5mins.ShortenerTools.Functions
                 if (!string.IsNullOrEmpty(vanity))
                 {
                     newRow = new MyShortUrlEntity(longUrl, vanity, title, expiresat, input.Schedules);
+
+                    _logger.LogInformation($"__trace IfShortUrlEntityExist start: {DateTime.Now}");
+
                     if (await stgHelper.IfShortUrlEntityExist(newRow))
                     {
                         var badResponse = req.CreateResponse(HttpStatusCode.Conflict);
                         await badResponse.WriteAsJsonAsync(new { Message = "This Short URL already exist." });
                         return badResponse;
                     }
+
+                    _logger.LogInformation($"__trace IfShortUrlEntityExist end: {DateTime.Now}");
                 }
                 else
                 {
                     newRow = new MyShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper), title, expiresat, input.Schedules);
                 }
 
+                _logger.LogInformation($"__trace SaveShortUrlEntity start: {DateTime.Now}");
+
                 await stgHelper.SaveShortUrlEntity(newRow);
+
+                _logger.LogInformation($"__trace SaveShortUrlEntity end: {DateTime.Now}");
 
                 var host = string.IsNullOrEmpty(_settings.CustomDomain) ? req.Url.Host : _settings.CustomDomain.ToString();
                 result = new LSShortResponse(host, newRow.Url, newRow.RowKey, newRow.Title, expiresat);
