@@ -53,6 +53,7 @@ namespace Cloud5mins.ShortenerTools.Functions
         )
         {
             _logger.LogInformation($"__trace creating shortURL: {req}");
+
             string userId = string.Empty;
             LSShortRequest input;
             var result = new LSShortResponse();
