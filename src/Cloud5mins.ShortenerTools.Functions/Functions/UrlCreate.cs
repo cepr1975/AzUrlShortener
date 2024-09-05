@@ -112,7 +112,7 @@ namespace Cloud5mins.ShortenerTools.Functions
                 }
                 else
                 {
-                    newRow = new ShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper), title, input.Schedules);
+                    newRow = new ShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper, _logger), title, input.Schedules);
                 }
 
                 await stgHelper.SaveShortUrlEntity(newRow);

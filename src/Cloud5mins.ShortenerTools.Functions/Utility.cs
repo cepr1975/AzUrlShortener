@@ -22,15 +22,20 @@ namespace Cloud5mins.ShortenerTools
         //sets the length of the unique code to add to vanity
         private const int MinVanityCodeLength = 3;//5
 
-        public static async Task<string> GetValidEndUrl(string vanity, StorageTableHelper stgHelper)
+
+        public static async Task<string> GetValidEndUrl(string vanity, StorageTableHelper stgHelper, ILogger _logger)
         {
             if (string.IsNullOrEmpty(vanity))
             {
                 var newKey = await stgHelper.GetNextTableId();
                 string getCode() => Encode(newKey);
                 if (await stgHelper.IfShortUrlEntityExistByVanity(getCode()))
-                    return await GetValidEndUrl(vanity, stgHelper);
+                {
+                    _logger.LogWarning($"__trace GetValidEndUrl::IfShortUrlEntityExistByVanity já Existe!!");
+                    return await GetValidEndUrl(vanity, stgHelper, _logger);
+                }
 
+                _logger.LogInformation($"__trace GetValidEndUrl::IfShortUrlEntityExistByVanity OK : {getCode()}");
                 return string.Join(string.Empty, getCode());
             }
             else

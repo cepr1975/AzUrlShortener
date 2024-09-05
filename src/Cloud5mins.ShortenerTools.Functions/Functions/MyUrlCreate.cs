@@ -124,7 +124,7 @@ namespace Cloud5mins.ShortenerTools.Functions
                 {
                     _logger.LogInformation($"__trace MyShortUrlEntity start: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
 
-                    newRow = new MyShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper), title, expiresat, input.Schedules);
+                    newRow = new MyShortUrlEntity(longUrl, await Utility.GetValidEndUrl(vanity, stgHelper, _logger), title, expiresat, input.Schedules);
 
                     _logger.LogInformation($"__trace MyShortUrlEntity end: {DateTime.Now.ToString("hh.mm.ss.ffffff")}");
                 }
