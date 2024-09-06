@@ -117,6 +117,42 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
             return shortUrlEntity;
         }
+
+        /// <summary>
+        /// Returns the ShortUrlEntity of the <paramref name="vanity"/>
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        /// <param name="vanity"></param>
+        /// <returns>ShortUrlEntity</returns>
+
+        public async Task<ShortUrlEntity> GetShortUrlEntityByVanity(string partitionKey, string vanity)
+        {
+            var tblUrls = GetUrlsTable(); // Retrieve the table reference
+            TableContinuationToken token = null;
+            ShortUrlEntity shortUrlEntity = null;
+
+            // Create the PartitionKey and RowKey filters
+            string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
+            string rowKeyFilter = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, vanity);
+
+            // Combine both filters using TableQuery.CombineFilters with "and"
+            string combinedFilter = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, rowKeyFilter);
+
+            // Create the query with the combined filter
+            TableQuery<ShortUrlEntity> query = new TableQuery<ShortUrlEntity>().Where(combinedFilter);
+
+            // Execute the query and retrieve the entity
+            do
+            {
+                var queryResult = await tblUrls.ExecuteQuerySegmentedAsync(query, token);
+                shortUrlEntity = queryResult.Results.FirstOrDefault();
+                token = queryResult.ContinuationToken; // Update token for continuation
+            } while (token != null && shortUrlEntity == null);
+
+            return shortUrlEntity;
+        }
+
+
         public async Task SaveClickStatsEntity(ClickStatsEntity newStats)
         {
             TableOperation insOperation = TableOperation.InsertOrMerge(newStats);
@@ -150,6 +186,12 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
         public async Task<bool> IfShortUrlEntityExistByVanity(string vanity)
         {
             ShortUrlEntity shortUrlEntity = await GetShortUrlEntityByVanity(vanity);
+            return (shortUrlEntity != null);
+        }
+
+        public async Task<bool> IfShortUrlEntityExistByVanity(string partitionkey, string vanity)
+        {
+            ShortUrlEntity shortUrlEntity = await GetShortUrlEntityByVanity(partitionkey, vanity);
             return (shortUrlEntity != null);
         }
 
@@ -347,6 +389,33 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
 
         }
 
+        public async Task<string> ClickStat_CountExpiredItemsAsync(int DeleteEntitiesCreatedNNumberDaysBeforeToday)
+        {
+            int TotalItens = 0;
+            CloudTable StatsTable = GetStatsTable();
+
+            DateTimeOffset dateTimeFilter = DateTime.UtcNow.AddDays(DeleteEntitiesCreatedNNumberDaysBeforeToday * -1);
+             
+            string Filter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThan, dateTimeFilter);
+             
+
+            TableQuery<MyShortUrlEntity> query = new TableQuery<MyShortUrlEntity>().Where(Filter);
+
+            int TotalEntities = 0;
+            TableContinuationToken token = null;
+            do
+            {
+                TableQuerySegment<MyShortUrlEntity> segment = await StatsTable.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                TotalEntities += segment.Results.Count;
+            } while (token != null);
+
+            return "#Itens: " + TotalEntities + " in StatsTable for the DateFilter: " + dateTimeFilter.ToString() + "| DeleteEntitiesCreatedNNumberDaysBeforeToday: " + DeleteEntitiesCreatedNNumberDaysBeforeToday;
+
+            //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
+
+        }
+
         public async Task<string> CountExpiredItemsAndDeleteAsync(int deleteEntitiesCreatedNNumberDaysBeforeToday)
         {
             int totalDeleted = 0;
@@ -386,6 +455,44 @@ namespace Cloud5mins.ShortenerTools.Core.Domain
             } while (token != null);
 
             return $"#Items: {TotalEntities} for the DateFilter: {dateTimeFilter} | DeleteEntitiesCreatedNNumberDaysBeforeToday: {deleteEntitiesCreatedNNumberDaysBeforeToday} \nDeleted: {totalDeleted} items.";
+            //return "#Itens: " + TotalEntities + " for the DateFilter: " + dateTimeFilter.ToString() + "| deleteEntitiesCreatedNNumberDaysBeforeToday: " + DeleteEntitiesCreatedNNumberDaysBeforeToday;
+
+            //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";
+
+        }
+
+
+        public async Task<string> clickStat_CountExpiredItemsAndDeleteAsync(int deleteEntitiesCreatedNNumberDaysBeforeToday)
+        {
+            int totalDeleted = 0;
+
+            CloudTable StatsTable = GetStatsTable();
+
+            DateTimeOffset dateTimeFilter = DateTime.UtcNow.AddDays(deleteEntitiesCreatedNNumberDaysBeforeToday * -1);
+             
+            string Filter = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThan, dateTimeFilter);             
+
+            TableQuery<MyShortUrlEntity> query = new TableQuery<MyShortUrlEntity>().Where(Filter);
+
+            int TotalEntities = 0;
+            TableContinuationToken token = null;
+            do
+            {
+                TableQuerySegment<MyShortUrlEntity> segment = await StatsTable.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                TotalEntities += segment.Results.Count;
+
+                // Process and delete each entity
+                foreach (var entity in segment.Results)
+                {
+                    TableOperation deleteOperation = TableOperation.Delete(entity);
+                    await StatsTable.ExecuteAsync(deleteOperation);
+                    totalDeleted++;
+                }
+
+            } while (token != null);
+
+            return $"#Items: {TotalEntities} in StatsTable for the DateFilter: {dateTimeFilter} | DeleteEntitiesCreatedNNumberDaysBeforeToday: {deleteEntitiesCreatedNNumberDaysBeforeToday} \nDeleted: {totalDeleted} items.";
             //return "#Itens: " + TotalEntities + " for the DateFilter: " + dateTimeFilter.ToString() + "| deleteEntitiesCreatedNNumberDaysBeforeToday: " + DeleteEntitiesCreatedNNumberDaysBeforeToday;
 
             //return "Deleted " + totalDeleted + " of " + TotalItens + " items with expired date.";

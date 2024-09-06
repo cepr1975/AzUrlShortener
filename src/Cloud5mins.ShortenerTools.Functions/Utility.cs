@@ -29,7 +29,7 @@ namespace Cloud5mins.ShortenerTools
             {
                 var newKey = await stgHelper.GetNextTableId();
                 string getCode() => Encode(newKey);
-                if (await stgHelper.IfShortUrlEntityExistByVanity(getCode()))
+                if (await stgHelper.IfShortUrlEntityExistByVanity("1",getCode()))
                 {
                     _logger.LogWarning($"__trace GetValidEndUrl::IfShortUrlEntityExistByVanity já Existe!!");
                     return await GetValidEndUrl(vanity, stgHelper, _logger);
